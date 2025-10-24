@@ -89,6 +89,14 @@ export const getslice = apislice.injectEndpoints({
       }),
       invalidatesTags: [{ type: "getdata", id: "LIST" }],
     }),
+      UpdateQuantity: builder.mutation({
+      query: ({ quantity }) => ({
+        method: "POST",
+        url: "/Setting",
+        body: { quantity },
+      }),
+      invalidatesTags: [{ type: "getdata", id: "LIST" }],
+    }),
 
     GetProduct: builder.mutation({
       query: ({}) => ({
@@ -221,6 +229,10 @@ export const getslice = apislice.injectEndpoints({
       query: ({}) => "/GetSoldProduct",
       providesTags: [{ type: "getdata", id: "LIST" }],
     }),
+    GetQuantity: builder.query({
+      query: ({}) => "/GetQuantity",
+      providesTags: [{ type: "getdata", id: "LIST" }],
+    }),
 
     GetSells: builder.query({
       query: ({}) => "/GetSells",
@@ -239,6 +251,7 @@ export const {
   useGetUserQuery,
   useGetSoldProductQuery,
   useAUTHMutation,
+  useGetQuantityQuery,
   useAdd_categoriesMutation,
   useAddproductsMutation,
   useRemoveProductMutation,
@@ -255,6 +268,7 @@ export const {
   useReset_passwordMutation,
   useSend_otpMutation,
   useVerify_otpMutation,
+  useUpdateQuantityMutation,
   useGetGetCategoriesQuery,
 } = getslice;
 

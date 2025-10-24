@@ -14,7 +14,9 @@ import { LinearGradient } from "expo-linear-gradient";
 import {
   useGetGetCategoriesQuery,
   useAdd_categoriesMutation,
+  useGetQuantityQuery,
   useRemovecategoryMutation,
+  useUpdateQuantityMutation,
 } from "@/components/Features/Getslice";
 import Loading from "../Loader/Loading";
 import { setTheame, getTheame } from "@/components/Features/Funcslice";
@@ -30,19 +32,30 @@ const SettingsScreen = () => {
   const dispatch = useDispatch();
   const { clearAuth } = Useauth();
 
-  // Queries and Mutations
+  // Queries & Mutations
   const {
-    data,
+    data: CateData,
     isLoading: isLoadingCate,
-    isError: isErrorCate,
   } = useGetGetCategoriesQuery("", {
-    pollingInterval: 1000,
+    pollingInterval: 100,
     refetchOnFocus: true,
     refetchOnReconnect: true,
   });
+
+  const {
+    data: QuantityData,
+    isLoading: isLoadingQuantity,
+  } = useGetQuantityQuery("", {
+    pollingInterval: 100,
+    refetchOnFocus: true,
+    refetchOnReconnect: true,
+  });
+
   const [addCategory, { isLoading: isLoadingAdd }] = useAdd_categoriesMutation();
   const [removeCategory, { isLoading: isLoadingRemove }] =
     useRemovecategoryMutation();
+  const [updateQuantity, { isLoading: isUpdatingQuantity }] =
+    useUpdateQuantityMutation();
 
   // Redux + Theme
   const isDarkStored = useSelector(getTheame);
@@ -54,11 +67,20 @@ const SettingsScreen = () => {
   const [modalVisible, setModalVisible] = useState(false);
   const [categoryName, setCategoryName] = useState("");
   const [categories, setCategories] = useState([]);
+  const [quantity, setQuantity] = useState("");
 
   // Load categories
   useEffect(() => {
-    if (data) setCategories(data);
-  }, [data]);
+    if (CateData) setCategories(CateData);
+  }, [CateData]);
+
+  // Load initial quantity
+  useEffect(() => {
+    if (!QuantityData)return; 
+    console.log(QuantityData)
+      setQuantity(String(QuantityData||'0' ));
+    
+  }, [QuantityData]);
 
   // Persist theme mode
   useEffect(() => {
@@ -85,7 +107,7 @@ const SettingsScreen = () => {
       setCategoryName("");
       setModalVisible(false);
     } catch (err) {
-      alert(err.message || "Failed to add category");
+      alert(err?.data?.message || "Failed to add category");
     }
   };
 
@@ -94,7 +116,18 @@ const SettingsScreen = () => {
     try {
       await removeCategory({ id }).unwrap();
     } catch (err) {
-      alert(err.message || "Failed to remove category");
+      alert(err?.data?.message || "Failed to remove category");
+    }
+  };
+
+  // Update Quantity (manual trigger)
+  const handleUpdateQuantity = async () => {
+    try {
+      if (!quantity) return alert("Enter a valid number");
+      await updateQuantity({ quantity: Number(quantity) }).unwrap();
+      alert("Quantity updated successfully");
+    } catch (err) {
+      alert(err?.data?.message || "Failed to update quantity");
     }
   };
 
@@ -103,15 +136,14 @@ const SettingsScreen = () => {
   const textColor = theame.text;
   const cardColor = theame.card;
   const lightShade = colorsh ? "#2e2e2e" : "#f9f9f9";
-  const TotalIn=!colorsh?['#ff8c00', '#ffae42']:[theame.background,'rgba(108, 108, 108, 1)']
+  const TotalIn = !colorsh
+    ? ["#ff8c00", "#ffae42"]
+    : [theame.background, "rgba(108, 108, 108, 1)"];
 
   return (
     <>
       <View style={[styles.container, { backgroundColor }]}>
-        <LinearGradient
-          colors={TotalIn}
-          style={styles.header}
-        >
+        <LinearGradient colors={TotalIn} style={styles.header}>
           <Text style={styles.headerText}>System Settings</Text>
         </LinearGradient>
 
@@ -137,7 +169,7 @@ const SettingsScreen = () => {
               onPress={() => router.push("../Remove/RemoveAllProduct")}
               style={styles.optionRow}
             >
-              <Feather name="lock" size={20} color={ORANGE_COLOR} />
+              <Feather name="trash-2" size={20} color={ORANGE_COLOR} />
               <Text style={[styles.optionText, { color: textColor }]}>
                 Remove All Product
               </Text>
@@ -148,7 +180,7 @@ const SettingsScreen = () => {
               onPress={() => router.push("../Remove/RemoveAllCate")}
               style={styles.optionRow}
             >
-              <Feather name="lock" size={20} color={ORANGE_COLOR} />
+              <Feather name="trash-2" size={20} color={ORANGE_COLOR} />
               <Text style={[styles.optionText, { color: textColor }]}>
                 Remove All Categories
               </Text>
@@ -185,6 +217,40 @@ const SettingsScreen = () => {
                 thumbColor={isDarkMode ? ORANGE_COLOR : "#ccc"}
               />
             </View>
+
+            <View style={{ width: "100%", marginVertical: 5 }}>
+              <Text style={{ marginBottom: 5, color: textColor }}>
+                Low Quantity
+              </Text>
+              <TextInput
+                value={quantity}
+                placeholder="Enter low quantity"
+                keyboardType="number-pad"
+                onChangeText={setQuantity}
+                style={{
+                  width: "95%",
+                  height: 40,
+                  backgroundColor: lightShade,
+                  padding: 10,
+                  borderRadius: 10,
+                  color: textColor,
+                }}
+              />
+              <TouchableOpacity
+                onPress={handleUpdateQuantity}
+                style={{
+                  marginTop: 10,
+                  backgroundColor: ORANGE_COLOR,
+                  padding: 10,
+                  borderRadius: 10,
+                  alignItems: "center",
+                }}
+              >
+                <Text style={{ color: "white", fontWeight: "bold" }}>
+                  Update Quantity
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
 
           {/* Categories */}
@@ -217,19 +283,17 @@ const SettingsScreen = () => {
           </View>
 
           {/* Danger Zone */}
-          <View
-            style={[
-              styles.section,
-              { backgroundColor: cardColor, borderTopColor: "#fee2e2" },
-            ]}
-          >
+          <View style={[styles.section, { backgroundColor: cardColor }]}>
             <Text style={[styles.sectionTitle, { color: "#dc2626" }]}>
               Danger Zone
             </Text>
             <TouchableOpacity onPress={clearAuth} style={styles.optionRow}>
               <Feather name="log-out" size={20} color="#dc2626" />
               <Text
-                style={[styles.optionText, { color: "#dc2626", fontWeight: "600" }]}
+                style={[
+                  styles.optionText,
+                  { color: "#dc2626", fontWeight: "600" },
+                ]}
               >
                 Log Out
               </Text>
@@ -277,7 +341,11 @@ const SettingsScreen = () => {
         </Modal>
       </View>
 
-      {(isLoadingCate || isLoadingAdd || isLoadingRemove) && (
+      {(isLoadingCate ||
+        isLoadingAdd ||
+        isLoadingRemove ||
+        isUpdatingQuantity ||
+        isLoadingQuantity) && (
         <View style={styles.loaderOverlay}>
           <Loading />
         </View>

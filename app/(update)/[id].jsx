@@ -74,6 +74,7 @@ const UpdateProductScreen = () => {
   const [retailPrice, setRetailPrice] = useState('12000');
   const [category, setCategory] = useState('Electronics');
   const [categories, setcategories] = useState([]);
+  const [ActualPrice,setActualPrice]=useState(0)
 
 
   
@@ -136,6 +137,8 @@ const UpdateProductScreen = () => {
       setDescription(prod.description);
       setRetailPrice(String(prod.retailPrice));
       setCategory(prod.category);
+      setActualPrice(String(prod.actualPrice));
+
       // Assume prod.image is array of strings (filenames)
       setProductImages(prod?.image || []);
     }
@@ -216,6 +219,8 @@ const UpdateProductScreen = () => {
       fm.append('description', description);
       fm.append('retailPrice', retailPrice);
       fm.append('category', category);
+      fm.append('category', category);
+      fm.append('actualPrice', ActualPrice);
 
       const data = await Update({ fm });
       console.log(data);
@@ -279,6 +284,13 @@ const UpdateProductScreen = () => {
             keyboardType="numeric"
             value={retailPrice}
             onChangeText={setRetailPrice}
+          />
+          <Text style={styles.label}>ActualPrice</Text>
+          <TextInput
+            style={styles.input}
+            keyboardType="numeric"
+            value={ActualPrice}
+            onChangeText={setActualPrice}
           />
 
 

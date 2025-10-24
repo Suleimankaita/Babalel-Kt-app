@@ -51,9 +51,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
       const logins = await Login({ username: fullname, password: Password }).unwrap();
       disp(settoken(logins))
-        if(data.error?.status){
-        alert(data.error?.message)
-      } 
 
        if(data){
       
@@ -78,7 +75,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
             <FontAwesome5 name="user" size={20} color="#777" style={styles.icon} />
             <TextInput
               style={styles.input}
-              placeholder="Full Name"
+              placeholder="Username"
               value={fullname}
               onChangeText={setFullname}
               keyboardType="default"

@@ -316,7 +316,7 @@ useEffect(() => {
             width: '100%',
             height: '100%',
             position: 'absolute',
-            backgroundColor:!colorsh? '#1414142a':theame.background,
+            backgroundColor:'#1414142a',
             justifyContent: 'center',
             alignItems: 'center',
             zIndex: 1000,

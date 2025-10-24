@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, SafeAreaView, Image } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { AntDesign, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useAUTHMutation } from '@/components/Features/Getslice';
 import { useDispatch } from 'react-redux';
 import { settoken } from '@/components/Features/Funcslice';
@@ -54,11 +54,10 @@ const LoginScreen = () => {
 
         <View style={styles.inputContainer}>
           <View style={styles.inputWrapper}>
-            <MaterialCommunityIcons name="email-outline" size={20} color="#777" style={styles.icon} />
+            <AntDesign name="user" size={20} color="#777" style={styles.icon} />
             <TextInput
               style={styles.input}
-              placeholder="Email"
-              keyboardType="email-address"
+              placeholder="Username"
               autoCapitalize="none"
               value={username}
               onChangeText={setusername}

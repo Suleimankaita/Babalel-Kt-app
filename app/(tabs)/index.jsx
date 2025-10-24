@@ -19,16 +19,17 @@ import {
 } from '@expo/vector-icons';
 import { io } from "socket.io-client";
 import { LinearGradient } from 'expo-linear-gradient';
-import { LineChart, Grid } from 'react-native-svg-charts';
+import { LineChart, Grid, BarChart } from 'react-native-svg-charts';
 import * as shape from 'd3-shape';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { useGetProductQuery, useGetSellsQuery } from '@/components/Features/Getslice';
+import { useGetProductQuery, useGetSellsQuery,useGetGetCategoriesQuery } from '@/components/Features/Getslice';
 import Loading from '../Loader/Loading';
 import { getTheame } from '@/components/Features/Funcslice';
 import { uri } from '@/components/Features/api/uri';
 import theames from '@/hooks/theame';
 import { useSelector } from 'react-redux';
 import Logo from "../../assets/images/logo.jpg"
+import { useRouter } from 'expo-router';
 const BaballeShopDashboard = () => {
   const {
     data: productData,
@@ -42,6 +43,13 @@ const BaballeShopDashboard = () => {
     data: productSell,
     isLoading: isLoadingSell,
   } = useGetSellsQuery('', {
+    refetchOnFocus: true,
+    refetchOnMountOrArgChange: true,
+  });
+  const {
+    data: productCate,
+    isLoading: isLoadingCate,
+  } = useGetGetCategoriesQuery('', {
     refetchOnFocus: true,
     refetchOnMountOrArgChange: true,
   });
@@ -69,6 +77,8 @@ const BaballeShopDashboard = () => {
 
   const [selldata, setselldata] = useState([]);
   const [sellFilter, setsellFilter] = useState([]);
+  const [CateFilter, setCateFilter] = useState([]);
+  const [SelectedCate, setSelectedCate] = useState('All');
 
   // Filter mode state for Total Inventory Value
   const [filterMode, setFilterMode] = useState('weekly'); // weekly, monthly, yearly
@@ -86,7 +96,6 @@ const BaballeShopDashboard = () => {
     }
 
     socket.current.on('connect', () => {
-      console.log('✅ Connected to Socket Server');
       fetch(`${uri}/Products`)
         .then(res => res.json())
         .then(data => data)
@@ -147,6 +156,15 @@ const BaballeShopDashboard = () => {
     });
   };
 
+  const [listCate,setlistCate]=useState([])
+
+  useEffect(()=>{
+    if(!productData)return;
+    const ms=productData.map(res=>res.name)
+    setlistCate(ms)
+      setSelectedCate(ms[0])
+  },[productData])
+
   // Total Inventory Value calculation (filter by mode)
   useEffect(() => {
     if (!datas) return;
@@ -178,7 +196,28 @@ const BaballeShopDashboard = () => {
   const TotalInColors = !colors ? ['#ff8c00', '#ffae42'] : [theame.background,'rgba(108, 108, 108, 1)'];
 
   const [visible,setvisible]=useState(false)
+  const [CateAmount,setCateAmount]=useState(false)
 
+useEffect(() => {
+  if (!productCate && !productData) return;
+
+  // Filter datas where the category includes the selected category
+  const Filter = datas.map(res => {
+    return{name:res.name,price:res.retailPrice,Category:res.category,quantity:res.quantity,actualPrice:res?.actualPrice}});
+  const mes= Filter.filter(res=>res.name.toLowerCase()===SelectedCate.toLowerCase());
+    setCateFilter(mes)
+  // Calculate total retail price
+  const total = mes.reduce((sum, item) => sum + (item.actualPrice || 0), 0);
+  setCateAmount(total);
+
+  
+  // Update filtered data
+  setCateFilter(mes);
+
+}, [SelectedCate, productCate, datas]);
+
+const [ListVisi,setListVisi]=useState(false)
+const router=useRouter()
   return (
     <>
       <SafeAreaView style={styles.container}>
@@ -313,7 +352,7 @@ const BaballeShopDashboard = () => {
               <View style={styles.chartLabels}>
                 {sellFilter.map((value, index) => (
                   <View key={value?._id || index} style={styles.labelItem}>
-                    <TouchableOpacity onPress={() => alert(index)}>
+                    <TouchableOpacity>
                       <Text style={styles.labelPrice}>{value?.time || ''}</Text>
                     </TouchableOpacity>
                   </View>
@@ -321,6 +360,78 @@ const BaballeShopDashboard = () => {
               </View>
             </ScrollView>
           </LinearGradient>
+
+           <LinearGradient
+      colors={TotalInColors}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={[styles.inventoryCard2, { marginTop: 20 }]}
+    >
+      <Text style={styles.inventoryCardTitle}>Total Product price</Text>
+
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', flexWrap:'wrap' }}>
+        <Text style={styles.inventoryCardValue}>₦{Number(CateAmount).toLocaleString()}</Text>
+                    <View style={{bottom:20}}>
+            <Text style={{color:'white',}}>Total Quantity {CateFilter[0]?.quantity}</Text>
+            <Text style={{color:'white',margin:5}}>Actual price ₦{Number(CateAmount).toLocaleString()}</Text>
+        <TouchableOpacity
+          onPress={() => setListVisi(true)}
+          style={{
+            width: '100%',
+            borderRadius: 10,
+            height: 35,
+            alignItems: 'center',
+            justifyContent: 'center',
+            backgroundColor: 'rgba(156, 148, 148, 0.25)',
+            padding: 5,
+          }}
+        >
+          
+          <Text style={{ color: 'white' }} numberOfLines={1}>
+            Filter by {SelectedCate}
+          </Text>
+        </TouchableOpacity>
+            </View>
+      </View>
+
+      <Animated.View style={{ opacity: fadeAnim, marginTop: 10 }}>
+        <BarChart
+          style={{ height: 100 }}
+          data={CateFilter.map(res => res.price || 0)}
+          svg={{ fill: 'rgba(255,255,255,0.9)' }}
+          contentInset={{ top: 10, bottom: 10 }}
+          spacingInner={0.3}
+          curve={shape.curveLinear}
+        >
+          <Grid svg={{ stroke: 'rgba(255,255,255,0.2)' }} />
+        </BarChart>
+      </Animated.View>
+    </LinearGradient>
+
+              <Modal transparent={true} animationType='slide' visible={ListVisi}>
+            <View style={{flex:1,backgroundColor:'rgba(1, 1, 1, 0.22)',justifyContent:'center',alignItems:'center'}}>
+
+              <View style={{backgroundColor:theame.background,width:'80%',height:'50%',borderRadius:15}}>
+        <View style={{ flexDirection: 'column', justifyContent: 'space-around', marginVertical: 10 }}>
+        
+            {listCate.map(mode => (
+              <TouchableOpacity onpre style={{height:50,width:'90%',borderRadius:10,margin:10,justifyContent:'center',padding:10,backgroundColor:'rgba(171, 171, 171, 0.15)'}} key={mode} onPress={() =>{ setSelectedCate(mode)
+                setListVisi(false)
+
+              }}>
+                <Text style={{ color: SelectedCate === mode ? 'orange' : '#b9b5b5ff', fontWeight: 'bold' }}>
+                  {mode.charAt(0).toUpperCase() + mode.slice(1)}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+
+              </View>
+
+            </View>
+          </Modal>
+
+
         </ScrollView>
       </SafeAreaView>
 
@@ -347,6 +458,7 @@ const style = (colorsh, theame) => StyleSheet.create({
   headerTitle: { fontSize: 22, fontWeight: 'bold', color: !colorsh ? '#333' : theame.text },
   headerRight: { width: 40, height: 40, borderRadius: 20, backgroundColor: !colorsh ? '#eee' : theame.text, justifyContent: 'center', alignItems: 'center' },
   inventoryCard: { marginHorizontal: 20, borderRadius: 15, padding: 20, overflow: 'hidden', height: 220, justifyContent: 'flex-start', marginBottom: 20, elevation: 5 },
+  inventoryCard2: { marginHorizontal: 20, borderRadius: 15, padding: 20, overflow: 'hidden', minHeight: 260, justifyContent: 'flex-start', marginBottom: 20, elevation: 5 },
   inventoryCardTitle: { color: 'white', fontSize: 16, marginBottom: 5 },
   inventoryCardValue: { color: 'white', fontSize: 30, fontWeight: 'bold' },
   row: { flexDirection: 'row', justifyContent: 'space-between', marginHorizontal: 20, marginBottom: 20 },

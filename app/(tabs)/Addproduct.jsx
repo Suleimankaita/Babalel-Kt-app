@@ -110,6 +110,7 @@ const AddProductScreen = () => {
   const [initialStock, setInitialStock] = useState('');
   const [description, setDescription] = useState('');
   const [retailPrice, setRetailPrice] = useState('');
+  const [actualPrice, setactualPrice] = useState('');
   const [category, setCategory] = useState('');
   const [isFeatured, setIsFeatured] = useState(false);
   const [selectdate, setselectdate] = useState('Today');
@@ -139,6 +140,12 @@ const AddProductScreen = () => {
 
   const addProductStyles=styles(colorsh,theame)
 
+
+  useEffect(()=>{
+    if(isErrorProducts){
+      alert(errorProducts.data.message)
+    }
+  },[isErrorProducts])
 
   useEffect(() => {
     const ms = async () => {
@@ -395,10 +402,14 @@ const AddProductScreen = () => {
                 )}
               </TouchableOpacity>
             </View>
-
+                <View style={{width:'35%'}}>
             <View style={addProductStyles.retailPriceBox}>
               <InputField colorsh={colorsh} theame={theame} addProductStyles={addProductStyles} label="Retail Price" placeholder="₦0.00" value={retailPrice} onChangeText={setRetailPrice} />
             </View>
+            <View style={addProductStyles.retailPriceBox}>
+              <InputField colorsh={colorsh} theame={theame} addProductStyles={addProductStyles} label="Actual Price" placeholder="₦0.00" value={actualPrice} onChangeText={setactualPrice} />
+            </View>
+                </View>
           </View>
         </View>
 
@@ -487,6 +498,7 @@ const AddProductScreen = () => {
                   fm.append('colors', colors);
                   fm.append('description', description);
                   fm.append('retailPrice', retailPrice);
+                  fm.append('actualPrice', actualPrice);
                   fm.append('category', category);
                   fm.append('isFeatured', isFeatured);
 
@@ -507,11 +519,10 @@ const AddProductScreen = () => {
       trigger: { seconds: 1 }, // triggers after 1 second
     });
 
-    Alert.alert('Notification scheduled!');
-                  console.log(add);
+      // console.log(add)
                   setShowPreviewModal(false);
                 } catch (err) {
-                  alert(err.message);
+                  alert(err.message||err.data?.message);
                 }
               }}
                   style={addProductStyles.publishButton}
