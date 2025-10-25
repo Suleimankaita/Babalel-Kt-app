@@ -121,7 +121,7 @@ const SoldProductsPage = () => {
 
   const styles = style(colorsh, theame);
 
-  if(!filteredData){
+  if(!filteredData.length){
     return<SafeAreaView style={{flex:1,justifyContent:"center",alignItems:'center'}}>
             <Text style={{color:theame.text}}>No Sell Product to display</Text>
           </SafeAreaView>

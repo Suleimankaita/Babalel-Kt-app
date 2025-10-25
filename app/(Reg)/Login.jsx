@@ -32,8 +32,9 @@ const LoginScreen = () => {
         alert(result.error?.data?.message || 'Invalid credentials');
         return;
       }
-
+      console.log(result)
       if (result?.data) {
+        
         dispatch(settoken(result.data));
         await AsyncStorage.setItem('cokkie', JSON.stringify(result.data));
         router.replace('/');

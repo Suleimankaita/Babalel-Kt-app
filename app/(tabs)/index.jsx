@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   Image,
   Modal,
+  Pressable,
 } from 'react-native';
 import {
   AntDesign,
@@ -96,6 +97,7 @@ const BaballeShopDashboard = () => {
     }
 
     socket.current.on('connect', () => {
+      console.log('✅ Connected to Socket Server');
       fetch(`${uri}/Products`)
         .then(res => res.json())
         .then(data => data)
@@ -157,6 +159,7 @@ const BaballeShopDashboard = () => {
   };
 
   const [listCate,setlistCate]=useState([])
+  const [moun,setmoun]=useState(0)
 
   useEffect(()=>{
     if(!productData)return;
@@ -206,11 +209,15 @@ useEffect(() => {
     return{name:res.name,price:res.retailPrice,Category:res.category,quantity:res.quantity,actualPrice:res?.actualPrice}});
   const mes= Filter.filter(res=>res.name.toLowerCase()===SelectedCate.toLowerCase());
     setCateFilter(mes)
+
   // Calculate total retail price
   const total = mes.reduce((sum, item) => sum + (item.actualPrice || 0), 0);
+  const sw = mes.reduce((sum, item) => sum + (item.price|| 0), 0);
   setCateAmount(total);
+  setmoun(sw);
 
   
+  console.log(mes)
   // Update filtered data
   setCateFilter(mes);
 
@@ -370,7 +377,7 @@ const router=useRouter()
       <Text style={styles.inventoryCardTitle}>Total Product price</Text>
 
       <View style={{ flexDirection: 'row', justifyContent: 'space-between', flexWrap:'wrap' }}>
-        <Text style={styles.inventoryCardValue}>₦{Number(CateAmount).toLocaleString()}</Text>
+        <Text style={styles.inventoryCardValue}>₦{Number(moun).toLocaleString()}</Text>
                     <View style={{bottom:20}}>
             <Text style={{color:'white',}}>Total Quantity {CateFilter[0]?.quantity}</Text>
             <Text style={{color:'white',margin:5}}>Actual price ₦{Number(CateAmount).toLocaleString()}</Text>
@@ -411,8 +418,10 @@ const router=useRouter()
               <Modal transparent={true} animationType='slide' visible={ListVisi}>
             <View style={{flex:1,backgroundColor:'rgba(1, 1, 1, 0.22)',justifyContent:'center',alignItems:'center'}}>
 
-              <View style={{backgroundColor:theame.background,width:'80%',height:'50%',borderRadius:15}}>
+              <Pressable  style={{backgroundColor:theame.background,width:'80%',height:'50%',borderRadius:15}}>
         <View style={{ flexDirection: 'column', justifyContent: 'space-around', marginVertical: 10 }}>
+          <ScrollView>
+
         
             {listCate.map(mode => (
               <TouchableOpacity onpre style={{height:50,width:'90%',borderRadius:10,margin:10,justifyContent:'center',padding:10,backgroundColor:'rgba(171, 171, 171, 0.15)'}} key={mode} onPress={() =>{ setSelectedCate(mode)
@@ -424,9 +433,10 @@ const router=useRouter()
                 </Text>
               </TouchableOpacity>
             ))}
+          </ScrollView>
           </View>
 
-              </View>
+              </Pressable>
 
             </View>
           </Modal>

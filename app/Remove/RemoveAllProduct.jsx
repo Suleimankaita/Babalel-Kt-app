@@ -91,7 +91,7 @@ const RemoveAllProductsScreen = () => {
       <View style={styles.content}>
         {/* 1. Alert Icon */}
         <View style={styles.iconContainer}>
-          <AntDesign name="closecircle" size={80} color="#D9534F" />
+          <AntDesign name="close-circle" size={80} color="#D9534F" />
         </View>
 
         {/* 2. Headline */}
@@ -182,7 +182,7 @@ const style =(colorsh,theame)=> StyleSheet.create({
     backgroundColor: '#D9534F', // Red for danger
   },
   deleteButtonText: {
-    color: theame.text,
+    color: 'white',
     fontSize: 18,
     fontWeight: '600',
   },

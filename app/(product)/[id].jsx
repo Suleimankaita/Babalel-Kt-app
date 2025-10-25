@@ -174,9 +174,17 @@ const ProductDetailPage = ({ onGoBack }) => {
         {/* 🧾 Product Info */}
         <View style={styles.productInfoCard}>
           <Text style={styles.productName}>{PRODUCT_DETAILS.name}</Text>
+        
+        <View style={{flexDirection:'row',justifyContent:'space-between',alignItems:'center'}}>
+
           <Text style={styles.productPrice}>
+        
             ₦{Number(PRODUCT_DETAILS?.retailPrice).toFixed(2)}
           </Text>
+        <TouchableOpacity onPress={()=>router.push(`(update)/${PRODUCT_DETAILS?._id}`)} style={{width:100,padding:5,height:30,borderRadius:10,backgroundColor:ORANGE_COLOR,alignItems:'center',justifyContent:'center'}}>
+            <Text style={{color:'white'}}>Edit {PRODUCT_DETAILS.name}</Text>
+          </TouchableOpacity>
+        </View>
           <Text style={styles.productDescription}>
             {PRODUCT_DETAILS.description || "No description available."}
           </Text>
@@ -201,6 +209,8 @@ const ProductDetailPage = ({ onGoBack }) => {
             </View>
           )}
 
+
+
           {/* Quantity Selector */}
           <View style={styles.optionRow}>
             <View style={styles.quantitySelector}>
@@ -220,7 +230,7 @@ const ProductDetailPage = ({ onGoBack }) => {
             </View>
             <Text style={styles.totalPrice}>Total: ₦{totalPrice.toFixed(2)}</Text>
           </View>
-
+          
           {/* 🛒 Sell Button */}
           <TouchableOpacity
             style={styles.addToCartButton}
